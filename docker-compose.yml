@@ -44,7 +44,22 @@ services:
   presto-coordinator:
     image: shawnzhu/prestodb:0.181
     ports:
-      - "8080:8080"
+      - "8082:8082"
+  zeppelin-test:
+    image: apache/zeppelin:0.10.0
+    container_name: zeppelin-test
+    environment:
+      - ZEPPELIN_LOG_DIR=./logs
+      - ZEPPELIN_NOTEBOOK_DIR=./notebook
+    ports:
+      - 8080:8080
+    volumes:
+      # to persist our data once we've destroyed our containers
+      - ./notebook:/notebook
+      - ./logs:/logs
+
+    
+  
 
 volumes:
   namenode:

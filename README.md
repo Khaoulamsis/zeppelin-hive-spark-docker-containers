@@ -47,3 +47,4 @@ Then query it from PrestoDB. You can get [presto.jar](https://prestosql.io/docs/
 * Ivan Ermilov [@earthquakesan](https://github.com/earthquakesan) (maintainer)
 * Yiannis Mouchakis [@gmouchakis](https://github.com/gmouchakis)
 * Ke Zhu [@shawnzhu](https://github.com/shawnzhu)
+"# zeppelin-hive-spark-docker-containers" 
