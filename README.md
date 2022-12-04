@@ -1,50 +1,60 @@
-[![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/big-data-europe/Lobby)
 
-# docker-hive
+## Mise en place de Spark sur Apache Zeppelin pour l’exécution d’un pipeline ML
 
-This is a docker container for Apache Hive 2.3.2. It is based on https://github.com/big-data-europe/docker-hadoop so check there for Hadoop configurations.
-This deploys Hive and starts a hiveserver2 on port 10000.
-Metastore is running with a connection to postgresql database.
-The hive configuration is performed with HIVE_SITE_CONF_ variables (see hadoop-hive.env for an example).
+L’objectif principal de notre projet est la mise en place de Spark sur Apache Zeppelin pour l’exécution d’un pipeline Machine Learning. Pour cela, on a utilisé ce cluster Docker qui contient le conteneur Docker de Apache Hive 2.3.2 et le conteneur de Apache Zeppelin 0.10.0.
 
-To run Hive with postgresql metastore:
+
+Pour cloner ce repository Github:
+```
+    git clone https://github.com/Khaoulamsis/zeppelin-hive-spark-docker-containers.git
+```
+
+Pour créer les conteneurs et les exécuter : 
 ```
     docker-compose up -d
 ```
 
-To deploy in Docker Swarm:
-```
-    docker stack deploy -c docker-compose.yml hive
-```
 
-To run a PrestoDB 0.181 with Hive connector:
+### Testing
 
+Tester la connexion avec Hive:
 ```
-  docker-compose up -d presto-coordinator
-```
-
-This deploys a Presto server listens on port `8080`
-
-## Testing
-Load data into Hive:
-```
-  $ docker-compose exec hive-server bash
+  $ docker exec -u root -it hive-hive-server-1 /bin/bash
   # /opt/hive/bin/beeline -u jdbc:hive2://localhost:10000
-  > CREATE TABLE pokes (foo INT, bar STRING);
-  > LOAD DATA LOCAL INPATH '/opt/hive/examples/files/kv1.txt' OVERWRITE INTO TABLE pokes;
+  > show databases;
+  > create database test;
 ```
 
-Then query it from PrestoDB. You can get [presto.jar](https://prestosql.io/docs/current/installation/cli.html) from PrestoDB website:
+Pour tester le bon fonctionnement de Zeppelin:
 ```
-  $ wget https://repo1.maven.org/maven2/io/prestosql/presto-cli/308/presto-cli-308-executable.jar
-  $ mv presto-cli-308-executable.jar presto.jar
-  $ chmod +x presto.jar
-  $ ./presto.jar --server localhost:8080 --catalog hive --schema default
-  presto> select * from pokes;
+    https://localhost:8080
 ```
 
-## Contributors
-* Ivan Ermilov [@earthquakesan](https://github.com/earthquakesan) (maintainer)
-* Yiannis Mouchakis [@gmouchakis](https://github.com/gmouchakis)
-* Ke Zhu [@shawnzhu](https://github.com/shawnzhu)
-"# zeppelin-hive-spark-docker-containers" 
+### Ajout des jars dans le conteneur Zeppelin
+```
+    docker exec -u root -it zeppelin-test bash
+    cd /opt/zeppelin/interpreter/jdbc
+    wget -c https://repo1.maven.org/maven2/org/apache/hive/hive-jdbc/2.3.2/hive-jdbc-2.3.2-standalone.jar  -O hive-jdbc-2.3.2-standalone.jar 
+    wget -c https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/2.6.0/hadoop-common-2.6.0.jar -O hadoop-common-2.6.0.jar
+```
+
+### Configuration de l'interpreteur Hive
+```
+    default.url  jdbc:hive2://hive-hive-server-1:10000/
+    default.use   hive
+    default.password    hive
+    default.driver    org.apache.hive.jdbc.HiveDriver
+```
+Dependencies: 
+
+``` 
+/opt/zeppelin/interpreter/jdbc/hive-jdbc-2.3.2-standalone.jar
+/opt/zeppelin/interpreter/jdbc/hadoop-common-2.6.0.jar
+```
+
+### Déplacer un fichier depuis la machine local à un conteneur Docker
+
+``` 
+docker cp fichier.csv 'identifiant du conteneur':/fichier.csv
+```
+
